@@ -12,16 +12,46 @@ const querystring = require('querystring');
 //   res.end(JSON.stringify(req.query))
 // })
 
+// const server = http.createServer((req,res)=>{
+//   if(req.method == 'POST') {
+//     console.log('content-type:', req.headers['content-type']);
+//     let postData = '';
+//     req.on('data', chunk=>{
+//       postData += chunk.toString();
+//     })
+//     req.on('end', ()=>{
+//       console.log('postData', postData);
+//       res.end(postData)
+//     })
+//   }
+// })
+
 const server = http.createServer((req,res)=>{
-  if(req.method == 'POST') {
-    console.log('content-type:', req.headers['content-type']);
-    let postData = '';
+  const method = req.method;
+  const url = req.url;
+  const path = url.split('?')[0];
+  const query = querystring.parse(url.split('?')[1]);
+  
+  //设置返回格式
+  res.setHeader('Content-type', 'application/json');
+  const resData = {
+    method,
+    url,
+    path,
+    query
+  }
+  if(method == 'GET') {
+    res.end(JSON.stringify(resData));
+  }
+  if(method == 'POST') {
+    let reqData = '0';
     req.on('data', chunk=>{
-      postData += chunk.toString();
+      reqData += chunk.toString();
+      resData.reqData = reqData;
     })
+
     req.on('end', ()=>{
-      console.log('postData', postData);
-      res.end(postData)
+      res.end(JSON.stringify(resData));
     })
   }
 })
